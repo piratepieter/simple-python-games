@@ -7,6 +7,7 @@ TODO
 - 1st example:
   - ~~simple drawing~~
   - print handouts
-- sheet cheat
+- cheat sheet (Pieter)
   - shows all 'print' functions
-- 1 more advanced drawing example
+  - overview of builtin colors
+- 1 more advanced drawing example (Lou)
