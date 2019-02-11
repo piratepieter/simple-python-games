@@ -5,7 +5,7 @@ TODO
   - windows: Lou
   - mac/linux: Pieter
 - 1st example:
-  - simple drawing
+  - ~~simple drawing
   - print handouts
 - sheet cheat
   - shows all 'print' functions
