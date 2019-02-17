@@ -3,7 +3,7 @@ TODO
 
 - install guide
   - windows: Lou
-  - mac/linux: Pieter
+  - ~~mac/linux: Pieter~~
 - 1st example:
   - ~~simple drawing~~
   - print handouts
