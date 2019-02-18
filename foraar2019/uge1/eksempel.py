@@ -2,13 +2,13 @@
 # Kig på http://arcade.academy/examples/drawing_primitives.html
 import arcade
 
-# Áben vindue
+# Åben vindue
 window = arcade.open_window(800, 800, 'Example')
 
-# Vælg bagrundsfarve
+# Vælg baggrundsfarve
 arcade.set_background_color(arcade.color.YELLOW)
 
-# Begyn tegningen
+# Begynd tegningen
 arcade.start_render()
 
 # Båd
