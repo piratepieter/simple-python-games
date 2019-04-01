@@ -1,5 +1,5 @@
-from BallPhysics import Ball
-from BallPhysics import PrizeBall
+from PhysicsObjects import Ball
+from PhysicsObjects import PrizeBall
 import arcade
 import socket
 
