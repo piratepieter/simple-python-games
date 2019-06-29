@@ -81,6 +81,73 @@ class Bullet:
         self.y += math.sin(r_rad) * self.speed * delta
         self.age += delta
 
+    def is_dead(self):
+        return self.age >= 10
+
+    def touching_player(self, players):
+        for name, player in players.items():
+                if name == self.shooter:
+                    continue
+                distance = (player.x - self.x) ** 2 + (player.y - self.y) ** 2
+                if distance < (player.radius + self.radius) ** 2:
+                    return name
+        return None
+
+
+class Bomb:
+    def __init__(self, name, player):
+        self.shooter = name
+        self.x = player.x
+        self.y = player.y
+        self.size = 5
+        self.detonation_factor = 3
+        self.color = player.color
+        self.age = 0
+        self.detonate_age = 4
+        self.max_age = self.detonate_age + 2
+
+        self.detonating = False
+        self.detonated = False
+
+    def draw(self):
+        if not self.detonating:
+            arcade.draw_rectangle_outline(
+                self.x - self.size / 2,
+                self.y - self.size / 2,
+                width=self.size,
+                height=self.size,
+                color=self.color,
+                border_width=self.size * (1 - self.age / self.detonate_age)
+            )
+        else:
+            arcade.draw_circle_outline(
+                self.x,
+                self.y,
+                self.size * self.detonation_factor,
+                self.color,
+            )
+
+    def update(self, delta):
+        self.detonating = (self.age > self.detonate_age)
+        self.age += delta
+
+    def is_dead(self):
+        return self.age > self.max_age
+
+    def touching_player(self, players):
+        if not self.detonating or self.detonated:
+            return None
+
+        self.detonated = True
+
+        for name, player in players.items():
+                if name == self.shooter:
+                    continue
+                distance = (player.x - self.x) ** 2 + (player.y - self.y) ** 2
+                if distance < (player.radius + self.size * self.detonation_factor) ** 2:
+                    return name
+        return None
+
 
 class MyWindow(ServerWindow):
     def __init__(self):
@@ -89,6 +156,7 @@ class MyWindow(ServerWindow):
 
         self.players = {}
         self.bullets = []
+        self.bombs = []
         self.score = {}
 
     def boundary_checks(self, obj):
@@ -103,24 +171,23 @@ class MyWindow(ServerWindow):
             obj.y += self.height
 
     def on_draw(self):
+        players = self.players.copy()
         arcade.start_render()
-        for player in self.players.values():
+
+        for player in players.values():
             player.draw()
 
         for bullet in self.bullets:
             bullet.draw()
 
-    def touching_player(self, bullet):
-        for name, player in self.players.items():
-                if name == bullet.shooter:
-                    continue
-                distance = (player.x - bullet.x) ** 2 + (player.y - bullet.y) ** 2
-                if distance < (player.radius + bullet.radius) ** 2:
-                    return name
-        return None
+        for bomb in self.bombs:
+            bomb.draw()
+
+
 
     def on_update(self, delta):
-        for player in self.players.values():
+        players = self.players.copy()
+        for player in players.values():
             player.update(delta)
             self.boundary_checks(player)
 
@@ -128,20 +195,31 @@ class MyWindow(ServerWindow):
             bullet.update(delta)
             self.boundary_checks(bullet)
 
+        for bomb in self.bombs:
+            bomb.update(delta)
+
         score_updated = False
 
         for i, bullet in reversed(list(enumerate(self.bullets))):
-            touching_player = self.touching_player(bullet)
+            touching_player = bullet.touching_player(players)
             if touching_player is not None:
                 self.bullets.pop(i)
                 self.score[touching_player] -= 1
                 self.score[bullet.shooter] += 1
                 score_updated = True
 
+        for i, bomb in reversed(list(enumerate(self.bombs))):
+            touching_player = bomb.touching_player(players)
+            if touching_player is not None:
+                self.score[touching_player] -= 2
+                self.score[bomb.shooter] += 2
+                score_updated = True
+
         if score_updated:
             self.send_score()
 
-        self.bullets = [bullet for bullet in self.bullets if bullet.age < 10]
+        self.bullets = [bullet for bullet in self.bullets if not bullet.is_dead()]
+        self.bombs = [bomb for bomb in self.bombs if not bomb.is_dead()]
 
     def send_score(self):
         msg = 'score:'
@@ -178,6 +256,9 @@ class MyWindow(ServerWindow):
         elif message == 'shoot':
             new_bullet = Bullet(name, self.players[name])
             self.bullets.insert(0, new_bullet)
+        elif message == 'bomb':
+            new_bomb = Bomb(name, self.players[name])
+            self.bombs.insert(0, new_bomb)
 
 
 s = MyWindow()

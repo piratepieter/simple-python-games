@@ -1,6 +1,7 @@
 from serverclient import ClientWindow
 import arcade
 import sys
+import math
 
 
 class MyWindow(ClientWindow):
@@ -12,6 +13,9 @@ class MyWindow(ClientWindow):
         self.color = arcade.color.BLACK
 
         self.score = {}
+
+        self.shots = math.inf
+        self.bombs = 5
 
     def on_draw(self):
         arcade.set_background_color(self.color)
@@ -37,10 +41,16 @@ class MyWindow(ClientWindow):
                 arcade.color.BLACK, 15,
             )
 
+        arcade.draw_text(
+            'Shots = {}    Bombs = {}'.format(self.shots, self.bombs),
+            5, 20,
+            arcade.color.BLACK, 15,
+        )
+
         if self.is_hyperjump_active():
             arcade.draw_text(
                 'Hyperjump activated!',
-                5, 20,
+                5, 50,
                 arcade.color.RED, 15,
             )
 
@@ -62,10 +72,16 @@ class MyWindow(ClientWindow):
         letter = chr(key).lower()
         if letter in ['a', 'w', 's', 'd']:
             self.send('move:' + letter)
-        if self.is_hyperjump_active() and letter == 'h':
+        elif self.is_hyperjump_active() and letter == 'h':
             self.send('move:' + letter)
         elif key == arcade.key.SPACE:
-            self.send('shoot')
+            if self.shots > 0:
+                self.send('shoot')
+                self.shots -= 1
+        elif letter == 'b':
+            if self.bombs > 0:
+                self.send('bomb')
+                self.bombs -= 1
 
     def on_connection_aborted(self):
         self.id = None
