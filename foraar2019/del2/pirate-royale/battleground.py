@@ -33,7 +33,7 @@ class Player:
             2.0)
 
     def move(self, move):
-        rotate_unit = 10
+        rotate_unit = 15
         speed_unit = 15
 
         if move == 'a':
@@ -110,7 +110,7 @@ class MyWindow(ServerWindow):
                 if name == bullet.shooter:
                     continue
                 distance = (player.x - bullet.x) ** 2 + (player.y - bullet.y) ** 2
-                if distance < (self.radius + self.bullet_radius) ** 2:
+                if distance < (player.radius + bullet.radius) ** 2:
                     return name
         return None
 
