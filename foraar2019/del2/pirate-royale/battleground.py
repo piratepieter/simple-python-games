@@ -10,8 +10,25 @@ class Player:
         self.x = x
         self.y = y
         self.r = r
+        self.radius = 8
         self.id = id
         self.color = color
+
+    def draw(self):
+        arcade.draw_circle_filled(
+            self.x,
+            self.y,
+            self.radius,
+            self.color)
+
+        r_rad = math.radians(self.r)
+        arcade.draw_line(
+            self.x,
+            self.y,
+            self.x + self.radius * math.cos(r_rad),
+            self.y + self.radius * math.sin(r_rad),
+            arcade.color.BLACK,
+            2.0)
 
 
 class Bullet:
@@ -21,7 +38,15 @@ class Bullet:
         self.y = player.y
         self.r = player.r
         self.color = player.color
+        self.radius = 2
         self.age = 0
+
+    def draw(self):
+        arcade.draw_circle_filled(
+            self.x,
+            self.y,
+            self.radius,
+            self.color)
 
 
 class MyWindow(ServerWindow):
@@ -32,9 +57,6 @@ class MyWindow(ServerWindow):
         self.players = {}
         self.bullets = []
         self.score = {}
-
-        self.radius = 8
-        self.bullet_radius = 2
 
     def move_player(self, name, move):
         player = self.players[name]
@@ -68,38 +90,13 @@ class MyWindow(ServerWindow):
         elif obj.y < 0:
             obj.y += self.height
 
-    def draw_player(self, name):
-        player = self.players[name]
-
-        arcade.draw_circle_filled(
-            player.x,
-            player.y,
-            self.radius,
-            player.color)
-
-        r_rad = math.radians(player.r)
-        arcade.draw_line(
-            player.x,
-            player.y,
-            player.x + self.radius * math.cos(r_rad),
-            player.y + self.radius * math.sin(r_rad),
-            arcade.color.BLACK,
-            2.0)
-
-    def draw_bullet(self, bullet):
-        arcade.draw_circle_filled(
-            bullet.x,
-            bullet.y,
-            self.bullet_radius,
-            bullet.color)
-
     def on_draw(self):
         arcade.start_render()
-        for name in self.players:
-            self.draw_player(name)
+        for player in self.players.values():
+            player.draw()
 
         for bullet in self.bullets:
-            self.draw_bullet(bullet)
+            bullet.draw()
 
     def touching_player(self, bullet):
         for name, player in self.players.items():
