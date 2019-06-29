@@ -39,6 +39,7 @@ class Bullet:
         self.r = player.r
         self.color = player.color
         self.radius = 2
+        self.speed = 70
         self.age = 0
 
     def draw(self):
@@ -47,6 +48,12 @@ class Bullet:
             self.y,
             self.radius,
             self.color)
+
+    def update(self, delta):
+        r_rad = math.radians(self.r)
+        self.x += math.cos(r_rad) * self.speed * delta
+        self.y += math.sin(r_rad) * self.speed * delta
+        self.age += delta
 
 
 class MyWindow(ServerWindow):
@@ -108,13 +115,8 @@ class MyWindow(ServerWindow):
         return None
 
     def on_update(self, delta):
-        bullet_speed = 70
         for bullet in self.bullets:
-            r_rad = math.radians(bullet.r)
-            bullet.x += math.cos(r_rad) * bullet_speed * delta
-            bullet.y += math.sin(r_rad) * bullet_speed * delta
-            bullet.age += delta
-
+            bullet.update(delta)
             self.boundary_checks(bullet)
 
         score_updated = False
