@@ -5,7 +5,7 @@ import sys
 
 class MyWindow(ClientWindow):
     def __init__(self, name):
-        super().__init__('localhost', name, 200, 200)
+        super().__init__('localhost', name, 300, 300)
 
         self.name = name
         self.id = None
@@ -25,14 +25,23 @@ class MyWindow(ClientWindow):
                 anchor_x='center',
             )
 
+        arcade.draw_text(
+            'Score: ',
+            5, self.height - 55,
+            arcade.color.BLACK, 15,
+        )
         for i, (name, score) in enumerate(self.score.items()):
             arcade.draw_text(
-                "%s: %s" % (name, score),
-                self.width / 2, self.height / 2 + i * 20,
+                "%s => %s" % (name, score),
+                75, self.height - 55 - i * 20,
                 arcade.color.BLACK, 15,
-                align='center',
-                anchor_x='center',
-                anchor_y='center'
+            )
+
+        if self.is_hyperjump_active():
+            arcade.draw_text(
+                'Hyperjump activated!',
+                5, 20,
+                arcade.color.RED, 15,
             )
 
     def on_message_received(self, message):
@@ -53,11 +62,19 @@ class MyWindow(ClientWindow):
         letter = chr(key).lower()
         if letter in ['a', 'w', 's', 'd']:
             self.send('move:' + letter)
+        if self.is_hyperjump_active() and letter == 'h':
+            self.send('move:' + letter)
         elif key == arcade.key.SPACE:
             self.send('shoot')
 
     def on_connection_aborted(self):
         self.id = None
+
+    def is_hyperjump_active(self):
+        try:
+            return int(self.score[self.name]) <= 2
+        except KeyError:
+            return False
 
 
 s = MyWindow(sys.argv[1])

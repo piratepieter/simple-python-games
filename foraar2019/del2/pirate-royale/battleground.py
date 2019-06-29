@@ -5,7 +5,7 @@ import math
 
 
 class Player:
-    def __init__(self, name, x, y, r, id, color):
+    def __init__(self, name, x, y, r, id, color, max_x, max_y):
         self.name = name
         self.x = x
         self.y = y
@@ -15,6 +15,8 @@ class Player:
         self.radius = 8
         self.id = id
         self.color = color
+        self.max_x = max_x
+        self.max_y = max_y
 
     def draw(self):
         arcade.draw_circle_filled(
@@ -44,6 +46,9 @@ class Player:
             self.speed += speed_unit
         elif move == 's':
             self.speed -= speed_unit
+        elif move == 'h':
+            self.x = random.randint(0, self.max_x)
+            self.y = random.randint(0, self.max_y)
 
     def update(self, delta):
         self.r += self.rotation_speed * delta
@@ -151,7 +156,9 @@ class MyWindow(ServerWindow):
             y=random.randint(0, self.height),
             r=random.randint(0, 360),
             id=len(self.players) + 1,
-            color=(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            color=(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
+            max_x=self.width,
+            max_y=self.height,
         )
         self.players[name] = new_player
         self.score[name] = 5
