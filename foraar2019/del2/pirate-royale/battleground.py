@@ -10,6 +10,7 @@ class Player:
         self.x = x
         self.y = y
         self.speed = 0
+        self.rotation_speed = 0
         self.r = r
         self.radius = 8
         self.id = id
@@ -36,15 +37,16 @@ class Player:
         speed_unit = 15
 
         if move == 'a':
-            self.r += rotate_unit
+            self.rotation_speed += rotate_unit
         elif move == 'd':
-            self.r -= rotate_unit
+            self.rotation_speed -= rotate_unit
         elif move == 'w':
             self.speed += speed_unit
         elif move == 's':
             self.speed -= speed_unit
 
     def update(self, delta):
+        self.r += self.rotation_speed * delta
         r_rad = math.radians(self.r)
         self.x += math.cos(r_rad) * self.speed * delta
         self.y += math.sin(r_rad) * self.speed * delta
@@ -58,7 +60,7 @@ class Bullet:
         self.r = player.r
         self.color = player.color
         self.radius = 2
-        self.speed = 70
+        self.speed = 70 + player.speed
         self.age = 0
 
     def draw(self):
