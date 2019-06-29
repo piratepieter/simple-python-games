@@ -9,6 +9,7 @@ class Player:
         self.name = name
         self.x = x
         self.y = y
+        self.speed = 0
         self.r = r
         self.radius = 8
         self.id = id
@@ -29,6 +30,24 @@ class Player:
             self.y + self.radius * math.sin(r_rad),
             arcade.color.BLACK,
             2.0)
+
+    def move(self, move):
+        rotate_unit = 10
+        speed_unit = 15
+
+        if move == 'a':
+            self.r += rotate_unit
+        elif move == 'd':
+            self.r -= rotate_unit
+        elif move == 'w':
+            self.speed += speed_unit
+        elif move == 's':
+            self.speed -= speed_unit
+
+    def update(self, delta):
+        r_rad = math.radians(self.r)
+        self.x += math.cos(r_rad) * self.speed * delta
+        self.y += math.sin(r_rad) * self.speed * delta
 
 
 class Bullet:
@@ -65,27 +84,6 @@ class MyWindow(ServerWindow):
         self.bullets = []
         self.score = {}
 
-    def move_player(self, name, move):
-        player = self.players[name]
-
-        rotate_unit = 10
-        step_unit = 10
-
-        if move == 'a':
-            player.r += rotate_unit
-        elif move == 'd':
-            player.r -= rotate_unit
-        elif move == 'w':
-            r_rad = math.radians(player.r)
-            player.x += math.cos(r_rad) * step_unit
-            player.y += math.sin(r_rad) * step_unit
-        elif move == 's':
-            r_rad = math.radians(player.r)
-            player.x -= math.cos(r_rad) * step_unit
-            player.y -= math.sin(r_rad) * step_unit
-
-        self.boundary_checks(player)
-
     def boundary_checks(self, obj):
         if obj.x > self.width:
             obj.x -= self.width
@@ -115,6 +113,10 @@ class MyWindow(ServerWindow):
         return None
 
     def on_update(self, delta):
+        for player in self.players.values():
+            player.update(delta)
+            self.boundary_checks(player)
+
         for bullet in self.bullets:
             bullet.update(delta)
             self.boundary_checks(bullet)
@@ -162,7 +164,8 @@ class MyWindow(ServerWindow):
     def on_message_received(self, name, message):
         if 'move:' in message:
             move = message[5:]
-            self.move_player(name, move)
+            player = self.players[name]
+            player.move(move)
         elif message == 'shoot':
             new_bullet = Bullet(name, self.players[name])
             self.bullets.insert(0, new_bullet)
